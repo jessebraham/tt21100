@@ -1,14 +1,3 @@
-[package]
-name         = "tt21100"
-version      = "0.1.0"
-authors      = ["Jesse Braham <jesse@beta7.io>"]
-edition      = "2021"
-rust-version = "1.58"
-description  = "An embedded-hal driver for the TT21100 multi-touch touchscreen controller"
-repository   = "https://github.com/jessebraham/tt21100"
-license      = "MIT OR Apache-2.0"
-categories   = ["embedded", "no-std"]
-
-[dependencies]
-bondrewd     = { version = "0.1.14", features = ["derive"], default-features = false }
-embedded-hal = { version = "0.2.7",  features = ["unproven"] }
+[workspace]
+resolver = "2"
+members  = ["tt21100", "tt21100-async"]

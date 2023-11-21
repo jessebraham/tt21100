@@ -1,6 +1,10 @@
 {
   "editor.formatOnSave": true,
 
-  "rust-analyzer.checkOnSave.allTargets": false,
-  "rust-analyzer.diagnostics.disabled": ["unresolved-proc-macro"]
+  "rust-analyzer.check.allTargets": false,
+  "rust-analyzer.diagnostics.disabled": ["unresolved-proc-macro"],
+
+  "[toml]": {
+    "editor.formatOnSave": false
+  }
 }
