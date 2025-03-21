@@ -11,4 +11,4 @@ categories   = ["embedded", "no-std"]
 
 [dependencies]
 bondrewd           = { version = "0.1.14", features = ["derive"], default-features = false }
-embedded-hal-async = "1.0.0-rc.1"
+embedded-hal-async = "1.0.0"

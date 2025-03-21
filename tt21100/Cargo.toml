@@ -11,4 +11,4 @@ categories   = ["embedded", "no-std"]
 
 [dependencies]
 bondrewd     = { version = "0.1.14", features = ["derive"], default-features = false }
-embedded-hal = { version = "0.2.7",  features = ["unproven"] }
+embedded-hal = "1.0.0"

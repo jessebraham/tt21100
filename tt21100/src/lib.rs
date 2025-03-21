@@ -5,10 +5,7 @@
 use core::{array::TryFromSliceError, fmt::Debug};
 
 use bondrewd::Bitfields;
-use embedded_hal::{
-    blocking::i2c::{Write, WriteRead},
-    digital::v2::InputPin,
-};
+use embedded_hal::i2c::I2c;
 
 // Default I²C address for the TT21100
 const I2C_ADDR: u8 = 0x24;
@@ -21,7 +18,7 @@ pub enum Error<E> {
     /// The message length did not match the expected value
     InvalidMessageLen(usize),
     /// Reading a GPIO pin resulted in an error
-    IOError,
+    IoError,
     /// Tried to read a touch point, but no data was available
     NoDataAvailable,
     /// Error converting a slice to an array
@@ -108,22 +105,19 @@ pub struct ButtonRecord {
 }
 
 /// TT21100 driver
-pub struct TT21100<I2C, IRQ> {
+pub struct TT21100<I2C> {
     /// Underlying I²C peripheral
     i2c: I2C,
-    /// Interrupt pin
-    irq: IRQ,
 }
 
-impl<I2C, IRQ, E> TT21100<I2C, IRQ>
+impl<I2C, E> TT21100<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
-    IRQ: InputPin,
+    I2C: I2c<Error = E>,
     E: Debug,
 {
     /// Create a new instance of the driver and initialize the device
-    pub fn new(i2c: I2C, irq: IRQ) -> Result<Self, Error<E>> {
-        let mut me = Self { i2c, irq };
+    pub fn new(i2c: I2C) -> Result<Self, Error<E>> {
+        let mut me = Self { i2c };
 
         // I'm honestly not entirely sure what is going on here (would be *really* nice
         // if I had a datasheet!).
@@ -149,11 +143,6 @@ where
             2 => Ok(me),
             n => Err(Error::InvalidMessageLen(n)),
         }
-    }
-
-    /// Is there data available to read from the device?
-    pub fn data_available(&self) -> Result<bool, Error<E>> {
-        self.irq.is_low().map_err(|_| Error::IOError)
     }
 
     /// Read an event from the device
