@@ -10,55 +10,61 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+# Cancel any currently running workflows from the same PR, branch, or
+# tag when a new workflow is triggered.
+#
+# https://stackoverflow.com/a/66336834
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+
 jobs:
+  # --------------------------------------------------------------------------
+  # Check
+
   check:
     name: cargo check
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         toolchain: ["1.58", stable, nightly]
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
           toolchain: ${{ matrix.toolchain }}
-          default: true
-      - uses: Swatinem/rust-cache@v1
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo check --workspace
+
+  # --------------------------------------------------------------------------
+  # Lint
 
   rustfmt:
     name: rustfmt
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
-          toolchain: nightly
-          override: true
           components: rustfmt
-      - uses: Swatinem/rust-cache@v1
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo fmt --all -- --check
 
   clippy:
     name: clippy
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
           components: clippy
-      - uses: Swatinem/rust-cache@v1
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo clippy -- -D warnings
