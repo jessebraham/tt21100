@@ -5,10 +5,7 @@
 use core::{array::TryFromSliceError, fmt::Debug};
 
 use bondrewd::Bitfields;
-use embedded_hal::{
-    blocking::i2c::{Write, WriteRead},
-    digital::v2::InputPin,
-};
+use embedded_hal::{digital::InputPin, i2c::I2c};
 
 // Default I²C address for the TT21100
 const I2C_ADDR: u8 = 0x24;
@@ -21,7 +18,7 @@ pub enum Error<E> {
     /// The message length did not match the expected value
     InvalidMessageLen(usize),
     /// Reading a GPIO pin resulted in an error
-    IOError,
+    IoError,
     /// Tried to read a touch point, but no data was available
     NoDataAvailable,
     /// Error converting a slice to an array
@@ -117,7 +114,7 @@ pub struct TT21100<I2C, IRQ> {
 
 impl<I2C, IRQ, E> TT21100<I2C, IRQ>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
     IRQ: InputPin,
     E: Debug,
 {
@@ -152,8 +149,8 @@ where
     }
 
     /// Is there data available to read from the device?
-    pub fn data_available(&self) -> Result<bool, Error<E>> {
-        self.irq.is_low().map_err(|_| Error::IOError)
+    pub fn data_available(&mut self) -> Result<bool, Error<E>> {
+        self.irq.is_low().map_err(|_| Error::IoError)
     }
 
     /// Read an event from the device
